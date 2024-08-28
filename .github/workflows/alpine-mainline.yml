@@ -110,7 +110,7 @@ jobs:
         id: build
         uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
         with:
-          platforms: linux/amd64, linux/arm/v6, linux/arm/v7, linux/arm64, linux/386, linux/ppc64le, linux/s390x
+          platforms: linux/amd64 #, linux/arm/v6, linux/arm/v7, linux/arm64, linux/386, linux/ppc64le, linux/s390x
           context: "{{ defaultContext }}:mainline/alpine-slim"
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
@@ -119,267 +119,267 @@ jobs:
           # cache-from: type=gha,scope=alpine-slim
           # cache-to: type=gha,mode=min,scope=alpine-slim
 
-      - name: Sign Docker Hub Manifest
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          set -ex
-          sudo apt update
-          sudo apt install -y notary
-          mkdir -p ~/.docker/trust/private
-          echo "$DOCKER_CONTENT_TRUST_REPOSITORY_KEY" > ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
-          chmod 0400 ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
-          docker trust key load ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key --name nginx
-          DIGEST=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".digest' | cut -d ':' -f2)
-          SIZE=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".size')
-          export NOTARY_AUTH=$(printf "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" | base64 -w0)
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
+      # - name: Sign Docker Hub Manifest
+      #   if: ${{ github.event_name != 'pull_request' }}
+      #   run: |
+      #     set -ex
+      #     sudo apt update
+      #     sudo apt install -y notary
+      #     mkdir -p ~/.docker/trust/private
+      #     echo "$DOCKER_CONTENT_TRUST_REPOSITORY_KEY" > ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
+      #     chmod 0400 ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
+      #     docker trust key load ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key --name nginx
+      #     DIGEST=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".digest' | cut -d ':' -f2)
+      #     SIZE=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".size')
+      #     export NOTARY_AUTH=$(printf "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" | base64 -w0)
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine-slim $SIZE --sha256 $DIGEST --publish --verbose
+      #     notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine${{ needs.version.outputs.distro }}-slim $SIZE --sha256 $DIGEST --publish --verbose
         # env:
         #   DOCKER_CONTENT_TRUST_REPOSITORY_KEY: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY }}
         #   DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID }}
         #   DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
         #   NOTARY_TARGETS_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
 
-  core:
-    name: Build Alpine NGINX mainline Docker image
-    needs: [version, slim]
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Check out the codebase
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+  # core:
+  #   name: Build Alpine NGINX mainline Docker image
+  #   needs: [version, slim]
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: Check out the codebase
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
 
-      - name: Configure AWS credentials
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
-        with:
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     - name: Configure AWS credentials
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+  #       with:
+  #         aws-region: ${{ secrets.AWS_REGION }}
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Login to Amazon ECR Public Gallery
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: public.ecr.aws
+  #     - name: Login to Amazon ECR Public Gallery
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+  #       with:
+  #         registry: public.ecr.aws
 
-      - name: Login to Docker Hub
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Login to Docker Hub
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Login to GitHub Container Registry
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Login to GitHub Container Registry
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to Quay
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_TOKEN }}
+  #     - name: Login to Quay
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+  #       with:
+  #         registry: quay.io
+  #         username: ${{ secrets.QUAY_USERNAME }}
+  #         password: ${{ secrets.QUAY_TOKEN }}
 
-      - name: Extract metadata (annotations, labels, tags) for Docker
-        id: meta
-        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
-        with:
-          images: |
-            docker.io/nginxinc/nginx-unprivileged
-            ghcr.io/nginxinc/nginx-unprivileged
-            public.ecr.aws/nginx/nginx-unprivileged
-            quay.io/nginx/nginx-unprivileged
-          tags: |
-            type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine
-            type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }}
-            type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine
-            type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }}
-            type=raw,value=${{ needs.version.outputs.major }}-alpine
-            type=raw,value=${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }}
-            type=raw,value=mainline-alpine
-            type=raw,value=mainline-alpine${{ needs.version.outputs.distro }}
-            type=raw,value=alpine
-            type=raw,value=alpine${{ needs.version.outputs.distro }}
-        env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+  #     - name: Extract metadata (annotations, labels, tags) for Docker
+  #       id: meta
+  #       uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
+  #       with:
+  #         images: |
+  #           docker.io/nginxinc/nginx-unprivileged
+  #           ghcr.io/nginxinc/nginx-unprivileged
+  #           public.ecr.aws/nginx/nginx-unprivileged
+  #           quay.io/nginx/nginx-unprivileged
+  #         tags: |
+  #           type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine
+  #           type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }}
+  #           type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine
+  #           type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }}
+  #           type=raw,value=${{ needs.version.outputs.major }}-alpine
+  #           type=raw,value=${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }}
+  #           type=raw,value=mainline-alpine
+  #           type=raw,value=mainline-alpine${{ needs.version.outputs.distro }}
+  #           type=raw,value=alpine
+  #           type=raw,value=alpine${{ needs.version.outputs.distro }}
+  #       env:
+  #         DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
 
-      - name: Build and push NGINX mainline Alpine image to Amazon ECR Public Gallery, Docker Hub, GitHub Container Registry, and Quay
-        id: build
-        uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
-        with:
-          platforms: linux/amd64, linux/arm/v6, linux/arm/v7, linux/arm64, linux/386, linux/ppc64le, linux/s390x
-          context: "{{ defaultContext }}:mainline/alpine"
-          labels: ${{ steps.meta.outputs.labels }}
-          annotations: ${{ steps.meta.outputs.annotations }}
-          tags: ${{ steps.meta.outputs.tags }}
-          push: ${{ github.event_name != 'pull_request' }}
-          # cache-from: type=gha,scope=debian-perl
-          # cache-to: type=gha,mode=min,scope=debian-perl
+  #     - name: Build and push NGINX mainline Alpine image to Amazon ECR Public Gallery, Docker Hub, GitHub Container Registry, and Quay
+  #       id: build
+  #       uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
+  #       with:
+  #         platforms: linux/amd64, linux/arm/v6, linux/arm/v7, linux/arm64, linux/386, linux/ppc64le, linux/s390x
+  #         context: "{{ defaultContext }}:mainline/alpine"
+  #         labels: ${{ steps.meta.outputs.labels }}
+  #         annotations: ${{ steps.meta.outputs.annotations }}
+  #         tags: ${{ steps.meta.outputs.tags }}
+  #         push: ${{ github.event_name != 'pull_request' }}
+  #         # cache-from: type=gha,scope=debian-perl
+  #         # cache-to: type=gha,mode=min,scope=debian-perl
 
-      - name: Sign Docker Hub Manifest
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          set -ex
-          sudo apt update
-          sudo apt install -y notary
-          mkdir -p ~/.docker/trust/private
-          echo "$DOCKER_CONTENT_TRUST_REPOSITORY_KEY" > ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
-          chmod 0400 ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
-          docker trust key load ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key --name nginx
-          DIGEST=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".digest' | cut -d ':' -f2)
-          SIZE=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".size')
-          export NOTARY_AUTH=$(printf "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" | base64 -w0)
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
-        env:
-          DOCKER_CONTENT_TRUST_REPOSITORY_KEY: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY }}
-          DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID }}
-          DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
-          NOTARY_TARGETS_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
+  #     - name: Sign Docker Hub Manifest
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       run: |
+  #         set -ex
+  #         sudo apt update
+  #         sudo apt install -y notary
+  #         mkdir -p ~/.docker/trust/private
+  #         echo "$DOCKER_CONTENT_TRUST_REPOSITORY_KEY" > ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
+  #         chmod 0400 ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
+  #         docker trust key load ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key --name nginx
+  #         DIGEST=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".digest' | cut -d ':' -f2)
+  #         SIZE=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".size')
+  #         export NOTARY_AUTH=$(printf "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" | base64 -w0)
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine${{ needs.version.outputs.distro }} $SIZE --sha256 $DIGEST --publish --verbose
+  #       env:
+  #         DOCKER_CONTENT_TRUST_REPOSITORY_KEY: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY }}
+  #         DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID }}
+  #         DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
+  #         NOTARY_TARGETS_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
 
-  perl:
-    name: Build Alpine NGINX mainline perl Docker image
-    needs: [version, core]
-    runs-on: ubuntu-22.04
-    strategy:
-      fail-fast: false
-    steps:
-      - name: Check out the codebase
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+  # perl:
+  #   name: Build Alpine NGINX mainline perl Docker image
+  #   needs: [version, core]
+  #   runs-on: ubuntu-22.04
+  #   strategy:
+  #     fail-fast: false
+  #   steps:
+  #     - name: Check out the codebase
+  #       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
+  #     - name: Set up QEMU
+  #       uses: docker/setup-qemu-action@49b3bc8e6bdd4a60e6116a5414239cba5943d3cf # v3.2.0
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+  #     - name: Set up Docker Buildx
+  #       uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
 
-      - name: Configure AWS credentials
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
-        with:
-          aws-region: ${{ secrets.AWS_REGION }}
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #     - name: Configure AWS credentials
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: aws-actions/configure-aws-credentials@e3dd6a429d7300a6a4c196c26e071d42e0343502 # v4.0.2
+  #       with:
+  #         aws-region: ${{ secrets.AWS_REGION }}
+  #         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-      - name: Login to Amazon ECR Public Gallery
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: public.ecr.aws
+  #     - name: Login to Amazon ECR Public Gallery
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+  #       with:
+  #         registry: public.ecr.aws
 
-      - name: Login to Docker Hub
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+  #     - name: Login to Docker Hub
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+  #       with:
+  #         username: ${{ secrets.DOCKERHUB_USERNAME }}
+  #         password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Login to GitHub Container Registry
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Login to GitHub Container Registry
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+  #       with:
+  #         registry: ghcr.io
+  #         username: ${{ github.actor }}
+  #         password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Login to Quay
-        if: ${{ github.event_name != 'pull_request' }}
-        uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_TOKEN }}
+  #     - name: Login to Quay
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # v3.3.0
+  #       with:
+  #         registry: quay.io
+  #         username: ${{ secrets.QUAY_USERNAME }}
+  #         password: ${{ secrets.QUAY_TOKEN }}
 
-      - name: Extract metadata (annotations, labels, tags) for Docker
-        id: meta
-        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
-        with:
-          images: |
-            docker.io/nginxinc/nginx-unprivileged
-            ghcr.io/nginxinc/nginx-unprivileged
-            public.ecr.aws/nginx/nginx-unprivileged
-            quay.io/nginx/nginx-unprivileged
-          tags: |
-            type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine-perl
-            type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }}-perl
-            type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine-perl
-            type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }}-perl
-            type=raw,value=${{ needs.version.outputs.major }}-alpine-perl
-            type=raw,value=${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }}-perl
-            type=raw,value=mainline-alpine-perl
-            type=raw,value=mainline-alpine${{ needs.version.outputs.distro }}-perl
-            type=raw,value=alpine-perl
-            type=raw,value=alpine${{ needs.version.outputs.distro }}-perl
-        env:
-          DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
+  #     - name: Extract metadata (annotations, labels, tags) for Docker
+  #       id: meta
+  #       uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81 # v5.5.1
+  #       with:
+  #         images: |
+  #           docker.io/nginxinc/nginx-unprivileged
+  #           ghcr.io/nginxinc/nginx-unprivileged
+  #           public.ecr.aws/nginx/nginx-unprivileged
+  #           quay.io/nginx/nginx-unprivileged
+  #         tags: |
+  #           type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine-perl
+  #           type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }}-perl
+  #           type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine-perl
+  #           type=raw,value=${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }}-perl
+  #           type=raw,value=${{ needs.version.outputs.major }}-alpine-perl
+  #           type=raw,value=${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }}-perl
+  #           type=raw,value=mainline-alpine-perl
+  #           type=raw,value=mainline-alpine${{ needs.version.outputs.distro }}-perl
+  #           type=raw,value=alpine-perl
+  #           type=raw,value=alpine${{ needs.version.outputs.distro }}-perl
+  #       env:
+  #         DOCKER_METADATA_ANNOTATIONS_LEVELS: manifest,index
 
-      - name: Build and push NGINX mainline perl Alpine image to Amazon ECR Public Gallery, Docker Hub, GitHub Container Registry, and Quay
-        id: build
-        uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
-        with:
-          platforms: linux/amd64, linux/arm/v6, linux/arm/v7, linux/arm64, linux/386, linux/ppc64le, linux/s390x
-          context: "{{ defaultContext }}:mainline/alpine-perl"
-          labels: ${{ steps.meta.outputs.labels }}
-          annotations: ${{ steps.meta.outputs.annotations }}
-          tags: ${{ steps.meta.outputs.tags }}
-          push: ${{ github.event_name != 'pull_request' }}
-          # cache-from: type=gha,scope=alpine-perl
-          # cache-to: type=gha,mode=min,scope=alpine-perl
+  #     - name: Build and push NGINX mainline perl Alpine image to Amazon ECR Public Gallery, Docker Hub, GitHub Container Registry, and Quay
+  #       id: build
+  #       uses: docker/build-push-action@5cd11c3a4ced054e52742c5fd54dca954e0edd85 # v6.7.0
+  #       with:
+  #         platforms: linux/amd64, linux/arm/v6, linux/arm/v7, linux/arm64, linux/386, linux/ppc64le, linux/s390x
+  #         context: "{{ defaultContext }}:mainline/alpine-perl"
+  #         labels: ${{ steps.meta.outputs.labels }}
+  #         annotations: ${{ steps.meta.outputs.annotations }}
+  #         tags: ${{ steps.meta.outputs.tags }}
+  #         push: ${{ github.event_name != 'pull_request' }}
+  #         # cache-from: type=gha,scope=alpine-perl
+  #         # cache-to: type=gha,mode=min,scope=alpine-perl
 
-      - name: Sign Docker Hub Manifest
-        if: ${{ github.event_name != 'pull_request' }}
-        run: |
-          set -ex
-          sudo apt update
-          sudo apt install -y notary
-          mkdir -p ~/.docker/trust/private
-          echo "$DOCKER_CONTENT_TRUST_REPOSITORY_KEY" > ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
-          chmod 0400 ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
-          docker trust key load ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key --name nginx
-          DIGEST=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".digest' | cut -d ':' -f2)
-          SIZE=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".size')
-          export NOTARY_AUTH=$(printf "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" | base64 -w0)
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
-          notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
-        env:
-          DOCKER_CONTENT_TRUST_REPOSITORY_KEY: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY }}
-          DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID }}
-          DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
-          NOTARY_TARGETS_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
+  #     - name: Sign Docker Hub Manifest
+  #       if: ${{ github.event_name != 'pull_request' }}
+  #       run: |
+  #         set -ex
+  #         sudo apt update
+  #         sudo apt install -y notary
+  #         mkdir -p ~/.docker/trust/private
+  #         echo "$DOCKER_CONTENT_TRUST_REPOSITORY_KEY" > ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
+  #         chmod 0400 ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key
+  #         docker trust key load ~/.docker/trust/private/$DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID.key --name nginx
+  #         DIGEST=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".digest' | cut -d ':' -f2)
+  #         SIZE=$(printf '${{ steps.build.outputs.metadata }}' | jq -r '."containerimage.descriptor".size')
+  #         export NOTARY_AUTH=$(printf "${{ secrets.DOCKERHUB_USERNAME }}:${{ secrets.DOCKERHUB_TOKEN }}" | base64 -w0)
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}.${{ needs.version.outputs.patch }}-alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}.${{ needs.version.outputs.minor }}-alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged ${{ needs.version.outputs.major }}-alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged mainline-alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #         notary -d ~/.docker/trust/ -s https://notary.docker.io addhash docker.io/nginxinc/nginx-unprivileged alpine${{ needs.version.outputs.distro }}-perl $SIZE --sha256 $DIGEST --publish --verbose
+  #       env:
+  #         DOCKER_CONTENT_TRUST_REPOSITORY_KEY: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY }}
+  #         DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_KEY_ID }}
+  #         DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
+  #         NOTARY_TARGETS_PASSPHRASE: ${{ secrets.DOCKER_CONTENT_TRUST_REPOSITORY_PASSPHRASE }}
